@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { gasCall, groupOptions, hasAnySpace } from "../api";
 
@@ -6,14 +6,9 @@ type Resp =
   | { ok: true; device_token: string; student_key?: string; group_name?: string; display_name?: string }
   | { ok: false; message: string };
 
-function emailHint(email: string): string {
-  const e = email.trim();
-  if (!e.includes("@")) return "";
-  const [local, domain] = e.split("@");
-  const head = (local || "").slice(0, 3);
-  if (!domain) return "";
-  return `ヒント：${head}***@${domain}`;
-}
+type HintResp =
+  | { ok: true; email_hint: string }
+  | { ok: false; message: string };
 
 export default function StudentLogin() {
   const nav = useNavigate();
@@ -21,11 +16,15 @@ export default function StudentLogin() {
   const [group, setGroup] = useState(groups[0] || "グループ1");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
 
+  // 名簿由来のメールヒント
+  const [emailHint, setEmailHint] = useState("");
+  const [hintBusy, setHintBusy] = useState(false);
+
   const hasSpace = hasAnySpace(name);
-  const hint = emailHint(email);
 
   const canSubmit =
     !busy &&
@@ -33,6 +32,52 @@ export default function StudentLogin() {
     !!name.trim() &&
     !!email.trim() &&
     !hasSpace;
+
+  const canFetchHint =
+    !!group &&
+    !!name.trim() &&
+    !hasSpace &&
+    !busy;
+
+  // グループ/氏名が入力されたら、名簿からメールヒントを取得
+  useEffect(() => {
+    let cancelled = false;
+
+    async function run() {
+      if (!canFetchHint) {
+        setEmailHint("");
+        return;
+      }
+
+      setHintBusy(true);
+      try {
+        const r = await gasCall<HintResp>("/auth/email-hint", {
+          group_name: group,
+          name_raw: name
+        });
+
+        if (cancelled) return;
+
+        if (r.ok) {
+          setEmailHint(r.email_hint || "");
+        } else {
+          // 見つからない時はヒント非表示（UIは穏当）
+          setEmailHint("");
+        }
+      } catch {
+        if (!cancelled) setEmailHint("");
+      } finally {
+        if (!cancelled) setHintBusy(false);
+      }
+    }
+
+    // タイピング中の連打を避けて少し遅延
+    const t = window.setTimeout(run, 350);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+  }, [group, name, canFetchHint]);
 
   async function submit() {
     if (!canSubmit) return;
@@ -47,7 +92,7 @@ export default function StudentLogin() {
       });
 
       if (!res.ok) {
-        setMsg(res.message || "入力内容をご確認ください。");
+        setMsg(res.message || "入力内容に誤りがないかをご確認ください。");
         return;
       }
 
@@ -74,14 +119,14 @@ export default function StudentLogin() {
       </div>
 
       <div className="field">
-        <label>② 氏名（スペースなし必須）</label>
+        <label>② 氏名（フルネーム）</label>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="例：山田太郎"
           disabled={busy}
         />
-        {hasSpace && <div className="hint">氏名にスペース（全角/半角）は使用できません。</div>}
+        {hasSpace && <div className="hint">スペースなしで入力してください。</div>}
       </div>
 
       <div className="field">
@@ -92,7 +137,12 @@ export default function StudentLogin() {
           placeholder="例：abc123@example.com"
           disabled={busy}
         />
-        {hint && <div className="hint">{hint}</div>}
+
+        {/* 名簿由来のヒント */}
+        {!!emailHint && <div className="hint">{emailHint}</div>}
+        {hintBusy && canFetchHint && !emailHint && (
+          <div className="hint">名簿を確認中...</div>
+        )}
       </div>
 
       <button className="btn" onClick={submit} disabled={!canSubmit}>

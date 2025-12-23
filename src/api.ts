@@ -1,32 +1,22 @@
 /**
- * Front utility layer
- * - gasCall: GAS(JSON返却想定)への呼び出し
- * - groupOptions: グループ1〜200
- * - hasAnySpace: 氏名のスペース検知（全角/半角）
- * - todayJst: JSTのYYYY-MM-DD
- * - toHourMinOptions: 0〜720分(12h)を10分刻みプルダウン用
+ * Front utility layer (CORS回避)
+ * - 開発/本番とも、原則として同一オリジンの /api/gas を叩く
+ *   → Cloudflare Pages Functions が GAS に中継
  */
 
 function envBase(): string {
-  const base = (import.meta as any).env?.VITE_GAS_API_BASE as string | undefined;
+  // ローカルでは未設定でもOK（/api/gas を使う）
+  const base = (import.meta as any).env?.VITE_API_BASE as string | undefined;
   return (base || "").trim().replace(/\/+$/, "");
 }
 
-function safeUrl(base: string): URL {
-  try {
-    return new URL(base);
-  } catch {
-    return new URL("https://" + base.replace(/^\/+/, ""));
-  }
-}
-
-function buildUrl(path: string, query?: Record<string, any>): string {
+function buildProxyUrl(path: string, query?: Record<string, any>): string {
   const base = envBase();
-  if (!base) throw new Error("VITE_GAS_API_BASE is not set");
+  // baseがあればそれを使う（本番で別ドメインにしたい場合）
+  // 無ければ同一オリジンの /api/gas
+  const url = new URL((base || "") + "/api/gas", window.location.origin);
 
-  const url = safeUrl(base);
   url.searchParams.set("path", path);
-
   if (query) {
     for (const [k, v] of Object.entries(query)) {
       if (v === undefined || v === null) continue;
@@ -36,17 +26,12 @@ function buildUrl(path: string, query?: Record<string, any>): string {
   return url.toString();
 }
 
-/**
- * GAS API call
- * - POST(JSON)固定（今はフロント実装を先に通す）
- * - query を渡すとURLクエリにも追加できる（admin_token等）
- */
 export async function gasCall<T>(
   path: string,
   body: Record<string, any> = {},
   query?: Record<string, any>
 ): Promise<T> {
-  const url = buildUrl(path, query);
+  const url = buildProxyUrl(path, query);
 
   const res = await fetch(url, {
     method: "POST",

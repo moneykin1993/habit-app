@@ -1,7 +1,770 @@
-:root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
-body { margin: 0; background: #f7f7f7; }
-.container { max-width: 720px; margin: 0 auto; padding: 16px; }
-.card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 6px rgba(0,0,0,.08); }
-.field { display: grid; gap: 8px; margin-top: 12px; }
-input { padding: 10px 12px; border-radius: 10px; border: 1px solid #ddd; }
-button { padding: 10px 12px; border-radius: 10px; border: 0; cursor: pointer; }
+:root{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  font-size: 16px;
+  color: #111827; /* gray-900 */
+}
+
+*{ box-sizing: border-box; }
+
+/* ★追加：表示ボタン後にスクロールバーが出て“右寄りに見える”ズレを防ぐ */
+html{
+  scrollbar-gutter: stable; /* 対応ブラウザでスクロールバー領域を常に確保 */
+}
+body{
+  margin: 0;
+  background: #f6f7fb;
+
+  /* 代替策：スクロールバー出現で横幅が変わらないようにする */
+  overflow-y: scroll;
+
+  /* ついでに横はみ出しで全体がずれるのも防止（テーブルは table-wrap 内でスクロール） */
+  overflow-x: hidden;
+}
+
+a{ color: inherit; }
+
+.container{
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* 縦にカードを積む画面用 */
+.stack{
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+/* ===== Card ===== */
+.card{
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 1px 10px rgba(0,0,0,.06);
+  border: 1px solid rgba(17,24,39,.06);
+}
+
+.title{
+  margin: 0 0 10px;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: .01em;
+}
+
+.h2{
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+/* ===== Form ===== */
+.field{
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+label{
+  font-size: 13px;
+  color: #374151; /* gray-700 */
+  font-weight: 700;
+}
+
+input,
+select{
+  width: 100%;
+  padding: 12px 12px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb; /* gray-200 */
+  background: #fff;
+  color: #111827;
+  outline: none;
+}
+
+input::placeholder{
+  color: #9ca3af; /* gray-400 */
+}
+
+input:focus,
+select:focus{
+  border-color: rgba(59,130,246,.55);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.18);
+}
+
+select{
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #6b7280 50%),
+    linear-gradient(135deg, #6b7280 50%, transparent 50%),
+    linear-gradient(to right, transparent, transparent);
+  background-position:
+    calc(100% - 18px) calc(50% - 3px),
+    calc(100% - 12px) calc(50% - 3px),
+    calc(100% - 2.5rem) 0.5rem;
+  background-size:
+    6px 6px,
+    6px 6px,
+    1px 1.6rem;
+  background-repeat: no-repeat;
+  padding-right: 36px;
+}
+
+button{
+  border-radius: 12px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.btn{
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px 12px;
+  background: #2563eb; /* blue-600 */
+  color: #fff;
+}
+
+.btn:hover{ filter: brightness(0.98); }
+.btn:active{ transform: translateY(1px); }
+
+.btn:disabled,
+button:disabled{
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.btn-secondary{
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: #eef2ff; /* indigo-50 */
+  color: #1e40af; /* indigo-800 */
+  width: 100%;
+}
+
+/* ===== Messages / Notes ===== */
+.message{
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fef2f2; /* red-50 */
+  border: 1px solid #fee2e2; /* red-100 */
+  color: #991b1b; /* red-800 */
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.hint{
+  margin-top: 6px;
+  font-size: 13px;
+  color: #6b7280; /* gray-500 */
+  line-height: 1.35;
+}
+
+.note,
+.subnote{
+  margin-top: 12px;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.45;
+}
+
+/* ===== Support text blocks ===== */
+.support{
+  padding: 12px 12px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+  line-height: 1.5;
+}
+
+.support-min{
+  height: 44px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px dashed #e5e7eb;
+}
+
+/* ===== Result rows ===== */
+.result-row{
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: baseline;
+  padding: 10px 0;
+  border-top: 1px solid #f1f5f9;
+}
+
+.result-row:first-of-type{
+  border-top: 0;
+  padding-top: 0;
+}
+
+.result-k{
+  color: #374151;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.result-v{
+  color: #111827;
+  font-weight: 900;
+  font-size: 15px;
+}
+
+/* ===== 視覚的に見やすい“指標カード” =====
+   TSX側で <div className="metrics"> ... <div className="metric ..."> を使うと効く
+*/
+
+/* 指標カードの横幅を1/2に（2列で折り返し） */
+.metrics{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+/* 2列（= 1枚あたり横幅1/2） */
+.metric{
+  flex: 0 0 calc(50% - 5px);
+  border-radius: 14px;
+  padding: 12px 12px;
+  border: 1px solid rgba(17,24,39,.06);
+  background: #f8fafc;
+  text-align: center; /* 中央揃え */
+}
+
+.metric .mk{
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 800;
+}
+
+.metric .mv{
+  margin-top: 6px;
+  font-size: 18px;
+  font-weight: 1000;
+  color: #111827;
+  letter-spacing: .01em;
+}
+
+.metric .ms{
+  margin-top: 6px;
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.3;
+}
+
+/* 実データ部分（数値）の色を「背景と同系色」に */
+.metric.streak{
+  background: linear-gradient(180deg, #ecfeff 0%, #f8fafc 100%);
+  border-color: rgba(6,182,212,.18);
+}
+.metric.streak .mv{ color: #0891b2; } /* cyan */
+
+.metric.total{
+  background: linear-gradient(180deg, #eef2ff 0%, #f8fafc 100%);
+  border-color: rgba(99,102,241,.18);
+}
+.metric.total .mv{ color: #4f46e5; } /* indigo */
+
+.metric.grade{
+  background: linear-gradient(180deg, #fff7ed 0%, #f8fafc 100%);
+  border-color: rgba(245,158,11,.20);
+}
+.metric.grade .mv{ color: #b45309; } /* amber */
+
+/* 旧：数値を並べるだけの表示（残しておく） */
+.pie{
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+}
+
+/* ===== Pie chart (Method A: CSS conic-gradient) ===== */
+
+/* 既存：横長カード（学生側などで使用していても壊れないよう残す） */
+.pie-wrap{
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 12px;
+  align-items: center;
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-radius: 22px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.pie-chart{
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #ffcd98 0 var(--p1),
+    #fceede var(--p1) var(--p2),
+    #ebebeb var(--p2) 360deg
+  );
+  position: relative;
+}
+
+/* ドーナツ穴（内側）
+   ★太さを現行の1.8倍：リング厚 = inset なので、inset を 1.8倍に増やす */
+.pie-chart::after{
+  content: "";
+  position: absolute;
+  inset: 22px; /* 旧(現行想定): 12px → 1.8倍 ≒ 22px */
+  background: #fff;
+  border-radius: 50%;
+  border: 1px solid rgba(17,24,39,.06);
+  z-index: 1;
+}
+
+/* 円グラフ中央テキスト（縦積み対応） */
+.pie-center{
+  position: absolute;
+  inset: 22px; /* 穴と揃える */
+  display: flex;
+  flex-direction: column;     /* ← 縦積み */
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 2;
+  pointer-events: none;
+  font-weight: 1000;
+  line-height: 1.05;
+  color: #111827;
+  font-size: 12px;
+}
+
+/* （旧）span で数値だけ強調したい場合にも対応 */
+.pie-center__pct{
+  display: inline-block;
+  margin-left: 0;             /* 縦積み前提なので0 */
+  font-size: 14px;
+  font-weight: 1100;
+}
+
+/* 新：縦積み用（今週 / 14.3% / 達成） */
+.pie-center-top{
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 800;
+}
+.pie-center-pct{
+  margin-top: 5px;
+  font-size: 21px;
+  color: #f4a959;
+  font-weight: 1100;
+  letter-spacing: .01em;
+}
+.pie-center-bottom{
+  margin-top: 5%;
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 800;
+}
+
+/* 注釈（共通） */
+.pie-legend{
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  color: #111827;
+}
+
+.pie-item{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pie-dot{
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: 0 0 10px;
+  border: 1px solid rgba(17,24,39,.06);
+}
+
+.pie-dot.achieved{ background: #ffcd98; }
+.pie-dot.not{ background: #fceede; }
+.pie-dot.unreported{ background: #ebebeb; }
+
+/* ★週の計画達成率カード：横幅は画面追従 + 円が潰れない */
+.pie-card{
+  width: 100%;
+  max-width: none;
+  margin: 10px auto 0;
+  padding: 12px;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+
+  /* 正方形固定はしない */
+  aspect-ratio: auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  /* ★space-between をやめて「潰れ」を防ぐ */
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+/* ★pie-cardの中：min() をやめて互換性UP + flexで潰れない + 必ず正円 */
+.pie-card .pie-chart{
+  flex: 0 0 auto;
+  flex-shrink: 0;
+
+  width: 270px;       /* 目標サイズ */
+  max-width: 100%;    /* 画面が狭い時は縮む */
+  height: auto;
+  aspect-ratio: 1 / 1;
+
+  margin-top: 2px;
+}
+
+/* ★太さ1.8倍（pie-card用）：旧 18px → 32px */
+.pie-card .pie-chart::after{
+  inset: 32px; /* 旧(現行想定): 18px → 1.8倍 ≒ 32px */
+}
+
+.pie-card .pie-center{
+  inset: 32px; /* 穴と揃える */
+}
+
+/* 注釈：横並び（3列） */
+.pie-card .pie-legend{
+  width: 100%;
+  max-width: none;
+  margin-top: 6px;
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  font-size: 13px;
+}
+
+.pie-card .pie-item{
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.pie-card .pie-dot{
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+}
+
+/* ===== ひとことコメント（左上ラベル） ===== */
+.card-badge{
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  font-size: 12px;
+  font-weight: 900;
+  color: #209674;
+  letter-spacing: .01em;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* ひとことコメント本文カード（ラベルと重ならないよう上に余白） */
+.positive{
+  position: relative;          /* ★badgeの基準 */
+  margin-top: 12px;
+  padding: 30px 12px 12px;     /* ★上だけ増やして重なり防止 */
+  border-radius: 12px;
+  background: #ecfdf5; /* green-50 */
+  border: 1px solid #d1fae5; /* green-100 */
+  color: #065f46; /* green-800 */
+  font-weight: 900;
+  line-height: 1.45;
+}
+
+/* ===== Student calendar ===== */
+.calendar{
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* 正方形 + 上部に日付 / 下部に○◎ */
+.day{
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #fff;
+  cursor: pointer;
+
+  aspect-ratio: 1 / 1;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  /* “ギリギリまで”寄せるため少し詰める */
+  padding: 8px 6px;
+  text-align: center;
+}
+
+.day:hover{ background: #f8fafc; }
+.day:active{ transform: translateY(1px); }
+
+.day-sel{
+  border-color: rgba(59,130,246,.55);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.18);
+}
+
+.day-date{
+  font-weight: 900;
+  font-size: 13px;
+  line-height: 1.15;
+  margin-top: 2px;
+}
+
+/* ○/◎ を “大きく・下寄せ・ギリギリ” */
+.day-mark{
+  line-height: 1;
+  margin-bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+
+  flex: 1;
+  min-height: 0;
+}
+
+/* ★ここが本体：文字ではなくCSSで円を描く（入力文字依存を排除） */
+.mark{
+  /* 文字は使わない（◎/〇のグリフ差を排除） */
+  color: transparent;
+  font-size: 0;
+  line-height: 0;
+
+  display: inline-block;
+  position: relative;
+
+  /* ★外径：◎○を同じサイズで表示（1.4倍相当の見た目を狙った値） */
+  width: 40px;
+  height: 40px;
+
+  transform: translateY(1px);
+}
+
+/* ○：外枠1本 */
+.mark-circle::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid #96dfeb; /* ○の色 */
+}
+
+/* ◎：外枠＋内枠（2重丸） */
+.mark-double::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid #ffcd98; /* ◎の色 */
+}
+.mark-double::after{
+  content: "";
+  position: absolute;
+  inset: 11px;               /* 内側リングの間隔 */
+  border-radius: 50%;
+  border: 3px solid #ffcd98; /* ◎の色 */
+}
+
+.small{
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ===== Admin table ===== */
+.table-wrap{
+  overflow: auto;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+
+  /* ★追加：親幅を超えて body を押し広げない */
+  max-width: 100%;
+}
+
+.table{
+  width: 100%;
+
+  /* 枠線（グリッド）を出すために collapse に変更 */
+  border-collapse: collapse;
+
+  min-width: 980px; /* 週列が増えても崩れにくく */
+}
+
+/* ★中央揃え + 薄いグレー枠線 */
+.table th,
+.table td{
+  padding: 10px 10px;
+  border: 1px solid #e5e7eb;   /* ← 縦横の薄グレー枠線 */
+  vertical-align: middle;
+  font-size: 13px;
+  background: #fff;
+
+  text-align: center;          /* ← セル内データを中央揃え */
+}
+
+/* ヘッダー */
+.table thead th{
+  font-weight: 900;
+  color: #111827;
+  background: #f8fafc;
+}
+
+/* sticky の都合で上に線が消えるのを防ぐ */
+.table thead th{
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Sticky */
+.sticky-head{
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.sticky-col{
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  background: #fff;
+  border-right: 1px solid #e5e7eb; /* collapse時も固定列境界が見えるように */
+
+  font-weight: 900;
+
+  /* ★氏名列だけは読みやすく左寄せに戻す */
+  text-align: left;
+}
+
+/* 左上(氏名)セルを最前面に */
+.table thead .sticky-col{
+  z-index: 4;
+  background: #f8fafc;
+}
+
+/* C評価セル：黄色で強調（赤/×/罰表現なし）
+   ※ .table td の background:#fff に上書きされないよう、詳細度を上げる */
+.table td.cell-c{
+  background: #fff7cc; /* やわらかい黄色 */
+}
+
+.table td.cell-c > div{
+  background: transparent;
+}
+
+.c-bold{
+  font-weight: 900;
+}
+
+.cell-sub{
+  margin-top: 2px;
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.2;
+}
+
+/* ===== Responsive tweaks ===== */
+@media (max-width: 420px){
+  .title{ font-size: 18px; }
+  input, select{ padding: 11px 12px; }
+
+  .calendar{ gap: 6px; }
+  .day{ padding: 8px 8px; }
+
+  .day-mark{ margin-bottom: 0; }
+
+  /* ★スマホでは外径を少し小さく */
+  .mark{
+    width: 30px;
+    height: 30px;
+  }
+
+  .mark-circle::before{ border-width: 4px; }
+
+  .mark-double::before{ border-width: 4px; }
+  .mark-double::after{
+    inset: 9px;
+    border-width: 4px;
+  }
+
+  .pie-wrap{ grid-template-columns: 84px 1fr; }
+  .pie-chart{ width: 84px; height: 84px; }
+
+  /* ★太さ1.8倍（スマホ：旧 11px → 20px） */
+  .pie-chart::after{ inset: 20px; }
+  .pie-center{ inset: 20px; }
+
+  /* スマホでは指標カードは1列に */
+  .metric{
+    flex: 0 0 100%;
+  }
+
+  .metric{ padding: 11px 10px; }
+  .metric .mv{ font-size: 16px; }
+
+  .pie-center{
+    font-size: 11px;
+  }
+  .pie-center__pct{
+    font-size: 13px;
+  }
+
+  /* ★pie-card：スマホでも潰れない（width固定+max-width / aspect-ratio維持） */
+  .pie-card{
+    max-width: none;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .pie-card .pie-chart{
+    width: 255px;
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+  }
+
+  /* ★太さ1.8倍（スマホ：pie-card 旧 17px → 31px） */
+  .pie-card .pie-chart::after{ inset: 31px; }
+  .pie-card .pie-center{ inset: 31px; }
+
+  .pie-center-pct{
+    font-size: 18px;
+  }
+
+  .pie-card .pie-legend{
+    grid-template-columns: repeat(3, 1fr);
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  /* ひとことコメント：スマホでも重ならないよう微調整 */
+  .card-badge{
+    top: 9px;
+    left: 11px;
+    font-size: 12px;
+  }
+  .positive{
+    padding-top: 28px;
+  }
+}
