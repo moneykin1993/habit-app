@@ -504,14 +504,6 @@ export default function StudentReport() {
             <div className="card-badge">ひとことコメント</div>
             {results.grade_message}
           </div>
-
-          {/* ▼ 追加：チームひとことコメント（APIが返さない場合は非表示） */}
-          {results.team_grade_message && (
-            <div className="positive">
-              <div className="card-badge">チームひとことコメント</div>
-              {results.team_grade_message}
-            </div>
-          )}
         </div>
       )}
     </div>
