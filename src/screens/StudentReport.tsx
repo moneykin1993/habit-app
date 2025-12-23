@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef  } from "react";
 import { useNavigate } from "react-router-dom";
 import { gasCall, todayJst, toHourMinOptions } from "../api";
 
@@ -135,6 +135,17 @@ export default function StudentReport() {
   // 成果（送信後のみ表示）
   const [results, setResults] = useState<SubmitResp extends any ? any : any>(null);
   const [showAvg, setShowAvg] = useState(false);
+
+  const resultsRef = useRef<HTMLDivElement | null>(null);
+
+  // 成果カードが表示されたら自動スクロール（中心に表示）
+  useEffect(() => {
+    if (!results) return;
+    const el = resultsRef.current;
+    if (!el) return;
+    // 連続送信時にも気づけるように毎回スクロール
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [results]);
 
   // 自動ログイン
   useEffect(() => {
@@ -408,7 +419,7 @@ export default function StudentReport() {
 
       {/* 成果（送信後のみ表示） */}
       {results && (
-        <div className="card">
+        <div className="card" ref={resultsRef}>
           <h2 className="h2">学習進捗</h2>
 
           {/* 指標カード（中央揃え・色はCSSで制御） */}
@@ -493,6 +504,14 @@ export default function StudentReport() {
             <div className="card-badge">ひとことコメント</div>
             {results.grade_message}
           </div>
+
+          {/* ▼ 追加：チームひとことコメント（APIが返さない場合は非表示） */}
+          {results.team_grade_message && (
+            <div className="positive">
+              <div className="card-badge">チームひとことコメント</div>
+              {results.team_grade_message}
+            </div>
+          )}
         </div>
       )}
     </div>

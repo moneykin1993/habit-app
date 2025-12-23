@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { gasCall, groupOptions, hasAnySpace } from "../api";
 
 type ResolveResp =
@@ -69,6 +69,17 @@ export default function ParentView() {
   const hasSpace = hasAnySpace(name);
   const canShow = !!group && !!name.trim() && !hasSpace && !busy;
 
+  // ▼ 追加：成果カードへスクロールするためのref
+  const summaryRef = useRef<HTMLDivElement | null>(null);
+
+  // ▼ 追加：成果カードが表示されたら中央へ自動スクロール
+  useEffect(() => {
+    if (!data || !("ok" in data) || !data.ok) return;
+    const el = summaryRef.current;
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [data]);
+
   async function show() {
     if (!canShow) return;
     setBusy(true);
@@ -137,7 +148,7 @@ export default function ParentView() {
       </div>
 
       {data && data.ok && (
-        <div className="card">
+        <div className="card" ref={summaryRef}>
           <h2 className="h2">学習状況を知る</h2>
 
           <div className="field">
@@ -228,7 +239,7 @@ export default function ParentView() {
 
           {/* ひとことコメント（左上ラベルはCSSで固定） */}
           <div className="positive">
-            <div className="card-badge">ひとことコメント</div>
+            <div className="card-badge">お子様へのひとことコメント</div>
             {data.results.grade_message}
           </div>
         </div>
