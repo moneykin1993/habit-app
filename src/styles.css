@@ -12,6 +12,10 @@
 /* ★追加：表示ボタン後にスクロールバーが出て“右寄りに見える”ズレを防ぐ */
 html{
   scrollbar-gutter: stable; /* 対応ブラウザでスクロールバー領域を常に確保 */
+
+  /* ★追加：iPhone(Safari)での文字サイズ反映を安定させる */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 body{
   margin: 0;
@@ -708,19 +712,53 @@ button:disabled{
 
 /* ===== Responsive tweaks ===== */
 
-/* ★スマホの文字をもっと大きく（全体の基準を上げる） */
+/* ★スマホの文字をもっと大きく（iPhoneでも確実に反映させるため“要素ごと上書き”） */
 @media (max-width: 480px){
-  :root{
-    font-size: clamp(18px, 4.6vw, 20px);
-  }
-
   /* ついでに左右余白を少し減らして、カレンダー等が収まりやすく */
   .container,
   .stack{
     padding: 12px;
   }
+
+  /* ★ここから「フォントサイズだけ」強制上書き（iPhoneでも必ず効く） */
+  .title{ font-size: 22px; }
+  .h2{ font-size: 19px; }
+
+  label{ font-size: 17px; }
+  input, select{ font-size: 17px; }
+  button{ font-size: 17px; }
+
+  .support{ font-size: 17px; }
+  .message{ font-size: 17px; }
+  .result-k,
+  .result-v{ font-size: 17px; }
+
+  /* 注釈系は本文より小さく（序列維持） */
+  .hint,
+  .note,
+  .subnote{ font-size: 16px; }
+
+  /* 指標カード */
+  .metric .mk{ font-size: 16px; }
+  .metric .mv{ font-size: 20px; }
+  .metric .ms{ font-size: 16px; }
+
+  /* 円グラフ周り */
+  .pie{ font-size: 15px; }
+  .pie-center{ font-size: 15px; }
+  .pie-center__pct{ font-size: 15px; }
+  .pie-center-top{ font-size: 15px; }
+  .pie-center-pct{ font-size: 24px; }
+  .pie-center-bottom{ font-size: 15px; }
+  .pie-legend{ font-size: 15px; }
+
+  /* カレンダーはみ出し対策：少し詰める（フォント以外は“詰め”のみ） */
+  .calendar{ gap: 6px; }
+  .day{ padding: 6px 4px; }
+  .day-date{ font-size: 14px; }
 }
 
+/* 既存：最小幅側の調整 */
 @media (max-width: 420px){
   /* ★スマホでもさらに見やすい最小値に寄せる（レイアウトはそのまま） */
   .title{ font-size: clamp(18px, 2.0vw + 12px, 20px); }
