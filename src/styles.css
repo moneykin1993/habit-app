@@ -511,9 +511,13 @@ button:disabled{
 /* ===== Student calendar ===== */
 .calendar{
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+
+  /* ★はみ出し対策：7列でも必ず縮められるように */
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+
   gap: 8px;
   margin-top: 10px;
+  width: 100%;
 }
 
 /* 正方形 + 上部に日付 / 下部に○◎ */
@@ -532,6 +536,9 @@ button:disabled{
   /* “ギリギリまで”寄せるため少し詰める */
   padding: 8px 6px;
   text-align: center;
+
+  /* ★はみ出し対策：セルが縮められるように */
+  min-width: 0;
 }
 
 .day:hover{ background: #f8fafc; }
@@ -700,14 +707,29 @@ button:disabled{
 }
 
 /* ===== Responsive tweaks ===== */
+
+/* ★スマホの文字をもっと大きく（全体の基準を上げる） */
+@media (max-width: 480px){
+  :root{
+    font-size: clamp(18px, 4.6vw, 20px);
+  }
+
+  /* ついでに左右余白を少し減らして、カレンダー等が収まりやすく */
+  .container,
+  .stack{
+    padding: 12px;
+  }
+}
+
 @media (max-width: 420px){
   /* ★スマホでもさらに見やすい最小値に寄せる（レイアウトはそのまま） */
   .title{ font-size: clamp(18px, 2.0vw + 12px, 20px); }
 
   input, select{ padding: 11px 12px; }
 
-  .calendar{ gap: 6px; }
-  .day{ padding: 8px 8px; }
+  /* ★カレンダーはみ出し対策：さらに詰める */
+  .calendar{ gap: 5px; }
+  .day{ padding: 6px 4px; }
 
   .day-mark{ margin-bottom: 0; }
 
